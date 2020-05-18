@@ -9,8 +9,9 @@ class DeepFeatureExtractor:
     def __init__(self, model=None, gpu=False):
         self.model = None
         self.layers = []
-        self.model_type = model
         self.gpu = gpu
+        self.model_type = None
+        self.layer_names = None
 
         self.resizer = transforms.Resize((224, 224))
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -19,6 +20,10 @@ class DeepFeatureExtractor:
 
         self.supported_models = ['vgg16', 'vgg19', 'resnet50', 'resnet101']
 
+        self.set_model(model, gpu)
+
+    def set_model(self, model, gpu=False):
+        self.model_type = model
         self.layer_names = {}
 
         if model in self.supported_models:
@@ -61,53 +66,6 @@ class DeepFeatureExtractor:
                 self.outputs[str(module)] = output.cpu().squeeze().detach().numpy()
             else:
                 self.outputs[str(module)] = output.squeeze().detach().numpy()
-
-        for layer in self.layers:
-            layer.register_forward_hook(hook)
-
-    def set_model(self, model):
-        self.model_type = model
-
-        if model in self.supported_models:
-            if model == 'vgg16':
-                self.model = models.vgg16()
-            if model == 'vgg19':
-                self.model = models.vgg19()
-            if model == 'resnet50':
-                self.model = models.resnet50()
-            if model == 'resnet101':
-                self.model = models.resnet101()
-        else:
-            err = "Model {} not available. Available models: {}".format(model, self.supported_models)
-            raise ValueError(err)
-
-        self.device = "cpu"
-        if self.gpu:
-            self.device = "cuda"
-            self.model.cuda()
-
-    def set_layers(self, layers):
-        self.layers.clear()
-
-        self.layer_names = {}
-
-        for layer in layers:
-            l = self.model._modules.get(layer)
-            self.layer_names[str(l)] = layer
-            if l is None:
-                err = "Layer {} not available in model {}.".format(layer, self.model_type)
-                raise ValueError(err)
-
-            self.layers.append(l)
-
-        # set the hooks
-        self.outputs = {}
-
-        def hook(module, input, output):
-            if module not in self.outputs:
-                self.outputs[module] = []
-
-            self.outputs[module].append(output.squeeze().detach().numpy())
 
         for layer in self.layers:
             layer.register_forward_hook(hook)
