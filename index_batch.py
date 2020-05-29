@@ -9,7 +9,13 @@ import sys
 
 
 def extract_and_add_to_h5(images, filenames, h5_file):
+    if args.debug:
+        features_timing = time.time()
+
     features = dfe.get_features(images)
+
+    if args.debug:
+        print("Features extracted in {} s".format(time.time() - features_timing))
 
     if "filenames" not in h5_file:
         index = 0
@@ -19,7 +25,16 @@ def extract_and_add_to_h5(images, filenames, h5_file):
         index = h5_file["filenames"].shape[0]
         h5_file["filenames"].resize((h5_file["filenames"].shape[0] + len(images),))
 
+    if args.debug:
+        h5_write_timing = time.time()
+
     h5_file["filenames"][index:] = filenames
+
+    if args.debug:
+        print("Filenames written to H5 in {} s".format(time.time() - h5_write_timing))
+
+    if args.debug:
+        h5_write_timing = time.time()
 
     for layer, feat in features.items():
         if layer not in h5_file:
@@ -32,6 +47,9 @@ def extract_and_add_to_h5(images, filenames, h5_file):
 
         h5_file[layer][index:] = feat.data
 
+    if args.debug:
+        print("Features written to H5 in {} s".format(time.time() - h5_write_timing))
+
     h5_file.flush()
 
 
@@ -42,6 +60,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, help='how many images to process at once (default 1)', default=1)
     parser.add_argument('--use_cuda', type=bool, help='whether to use CUDA', default=False)
     parser.add_argument('--data_range', type=str, help='range of data to process (12:123)')
+    parser.add_argument('--debug', type=bool, help='debug mode, default is False', default=False)
     parser.add_argument('output', type=str, help='full-path to output')
     args = parser.parse_args()
 
@@ -80,7 +99,14 @@ if __name__ == "__main__":
 
     for filename in valid_image_filenames[data_range[0]:data_range[1]]:
         try:
+            if args.debug:
+                timing_imread = time.time()
+
             im = Image.open(os.path.join(args.path, filename))
+
+            if args.debug:
+                print("Image {} read in {} s".format(filename, time.time() - timing_imread))
+
         except IOError:
             continue
 
