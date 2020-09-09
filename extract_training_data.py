@@ -6,7 +6,7 @@ import pickle
 import argparse
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Train kNN classifer from manually verified data.')
+    parser = argparse.ArgumentParser(description='Train kNN classifier from manually verified data.')
     parser.add_argument('path_features', type=str, help='path to h5 files with features')
     parser.add_argument('list_of_files', type=str, help='TXT file with a list of manually verified data')
     parser.add_argument('labels', type=str, help='path to jsons with manual annotations')
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     for fil in list_of_files:
         ann_file = fil + ".json"
         ann_data = json.load(open(os.path.join(args.labels, ann_file), "rt"))
+
         if ann_data["manually_verified"] == "no":
             print("Data {} was not manually verified! Skipping...".format(fil))
             continue
@@ -63,3 +64,7 @@ if __name__ == "__main__":
     id_list_pickle = open(os.path.join(args.output, 'id_list_resnet50_pytorch.p'), 'wb')
     pickle.dump(ids, id_list_pickle, protocol=pickle.HIGHEST_PROTOCOL)
     id_list_pickle.close()
+
+    labels_pickle = open(os.path.join(args.output, 'labels_resnet50_pytorch.p'), 'wb')
+    pickle.dump(labels, labels_pickle, protocol=pickle.HIGHEST_PROTOCOL)
+    labels_pickle.close()
