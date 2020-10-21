@@ -4,7 +4,7 @@ import os
 import argparse
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Train kNN classifer from manually verified data.')
+    parser = argparse.ArgumentParser(description='Copies the data from a list to a given location.')
     parser.add_argument('path_images', type=str, help='path to images for training')
     parser.add_argument('list_of_files', type=str, help='TXT file with a list of manually verified data')
     parser.add_argument('labels', type=str, help='path to jsons with manual annotations')

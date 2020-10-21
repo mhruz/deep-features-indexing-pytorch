@@ -9,6 +9,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train kNN classifier from manually verified data.')
     parser.add_argument('path_features', type=str, help='path to h5 files with features')
     parser.add_argument('list_of_files', type=str, help='TXT file with a list of manually verified data')
+    parser.add_argument('--ignore_validity', type=bool,
+                        help='whether to ignore validity of file (correct_label, manually verified)', default=False)
     parser.add_argument('labels', type=str, help='path to jsons with manual annotations')
     parser.add_argument('output', type=str, help='path to output')
     args = parser.parse_args()
@@ -34,12 +36,13 @@ if __name__ == "__main__":
         ann_file = fil + ".json"
         ann_data = json.load(open(os.path.join(args.labels, ann_file), "rt"))
 
-        if ann_data["manually_verified"] == "no":
-            print("Data {} was not manually verified! Skipping...".format(fil))
-            continue
-        if ann_data["correct_label"] != "yes":
-            print("Data {} is not correct! Skipping...".format(fil))
-            continue
+        if not args.ignore_validity:
+            if ann_data["manually_verified"] == "no":
+                print("Data {} was not manually verified! Skipping...".format(fil))
+                continue
+            if ann_data["correct_label"] != "yes":
+                print("Data {} is not correct! Skipping...".format(fil))
+                continue
 
         if ann_data["page_type"] not in ids:
             target = len(ids)

@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert a directory structure of images into desired format and save')
@@ -20,19 +20,24 @@ if __name__ == "__main__":
             if not file.endswith(accepted_extentions):
                 continue
 
-            im = Image.open(os.path.join(root, file))
-            if args.resize != 1.0:
-                im = im.resize((int(round(im.size[0] * args.resize)), int(round(im.size[1] * args.resize))))
-
             cp = os.path.commonpath([args.path_source, root])
             target_path = root.replace(cp, args.path_output)
 
-            if os.path.isfile(target_path) and args.rewrite is not True:
-                continue
-                
             os.makedirs(target_path, exist_ok=True)
             out_filename = os.path.basename(file)
             out_filename = os.path.splitext(out_filename)[0]
             out_filename += ".{}".format(args.out_type)
+
+            if os.path.isfile(os.path.join(target_path, out_filename)) and args.rewrite is False:
+                continue
+
+            try:
+                im = Image.open(os.path.join(root, file))
+            except UnidentifiedImageError:
+                print("PIL.UnidentifiedImageError: cannot identify image file \'{}\'".format(file))
+                continue
+
+            if args.resize != 1.0:
+                im = im.resize((int(round(im.size[0] * args.resize)), int(round(im.size[1] * args.resize))))
 
             im.save(os.path.join(target_path, out_filename), quality=50)

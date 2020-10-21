@@ -47,7 +47,7 @@ if __name__ == "__main__":
     json_output = open(os.path.join(args.output, "results.json"), "wt", encoding="utf8")
 
     if args.annotations is not None:
-        confusion_matrix = np.zeros((len(id_list), len(id_list)))
+        confusion_matrix = np.zeros((len(id_list) + 1, len(id_list) + 1))
     else:
         json_ann = None
         confusion_matrix = None
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 target = id_list.index(json_ann["page_type"])
             except ValueError:
                 print("Unknown target: {}".format(json_ann["page_type"]))
-                continue
+                target = len(id_list)
 
             try:
                 if json_ann["manually_verified"] == "yes":
@@ -96,12 +96,12 @@ if __name__ == "__main__":
                              os.path.join(args.output, "debug_med_dist", json_ann["page_type"], pred,
                                           f["filenames"][idx]))
 
-                if 500 < dist:
-                    os.makedirs(os.path.join(args.output, "debug_high_dist", json_ann["page_type"],
-                                             id_list[labels_train[index[0]]]), exist_ok=True)
-                    copyfile(os.path.join(args.path_images, f["filenames"][idx]),
-                             os.path.join(args.output, "debug_high_dist", json_ann["page_type"], pred,
-                                          f["filenames"][idx]))
+                # if 500 < dist:
+                #     os.makedirs(os.path.join(args.output, "debug_high_dist", json_ann["page_type"],
+                #                              id_list[labels_train[index[0]]]), exist_ok=True)
+                #     copyfile(os.path.join(args.path_images, f["filenames"][idx]),
+                #              os.path.join(args.output, "debug_high_dist", json_ann["page_type"], pred,
+                #                           f["filenames"][idx]))
 
             if index == target:
                 acc += 1
