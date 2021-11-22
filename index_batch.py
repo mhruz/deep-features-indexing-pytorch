@@ -105,7 +105,7 @@ if __name__ == "__main__":
             if args.debug:
                 timing_imread = time.time()
 
-            im = Image.open(os.path.join(args.path, filename))
+            im = Image.open(os.path.join(args.path, filename)).convert("RGB")
 
             if args.debug:
                 print("Image {} read in {} s".format(filename, time.time() - timing_imread))

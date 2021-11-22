@@ -5,7 +5,6 @@ from copy import deepcopy
 import numpy as np
 import time
 
-
 class DeepFeatureExtractor:
     def __init__(self, model=None, gpu=False):
         self.model = None
