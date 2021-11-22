@@ -3,6 +3,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from copy import deepcopy
 import numpy as np
+import time
 
 
 class DeepFeatureExtractor:
@@ -12,6 +13,8 @@ class DeepFeatureExtractor:
         self.gpu = gpu
         self.model_type = None
         self.layer_names = None
+        self.device = "cpu"
+        self.outputs = {}
 
         self.resizer = transforms.Resize((224, 224))
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -54,7 +57,7 @@ class DeepFeatureExtractor:
 
         self.device = "cpu"
         if self.gpu:
-            self.device = "cuda"
+            self.device = "cuda:0"
             self.model.cuda()
 
         # set the hooks
@@ -70,9 +73,12 @@ class DeepFeatureExtractor:
         for layer in self.layers:
             layer.register_forward_hook(hook)
 
-    def get_features(self, images):
+    def get_features(self, images, debug=False):
 
         t_imgs = []
+
+        if debug:
+            transformer_timing = time.time()
 
         for img in images:
             t_img = self.normalize(self.to_tensor(self.resizer(img)))
@@ -80,7 +86,16 @@ class DeepFeatureExtractor:
 
         t_imgs = torch.stack(t_imgs)
 
+        if debug:
+            print("Image transformation {} s".format(time.time() - transformer_timing))
+
+        if debug:
+            prediction_timing = time.time()
+
         out = self.model(t_imgs)
+
+        if debug:
+            print("Prediction time {} s".format(time.time() - prediction_timing))
 
         features = deepcopy(self.outputs)
         renamed_features = {}

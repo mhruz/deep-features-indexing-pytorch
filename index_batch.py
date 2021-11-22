@@ -6,13 +6,14 @@ from PIL import Image
 from networks import DeepFeatureExtractor
 import time
 import sys
+import torch
 
 
 def extract_and_add_to_h5(images, filenames, h5_file):
     if args.debug:
         features_timing = time.time()
 
-    features = dfe.get_features(images)
+    features = dfe.get_features(images, debug=args.debug)
 
     if args.debug:
         print("Features extracted in {} s".format(time.time() - features_timing))
@@ -64,10 +65,12 @@ if __name__ == "__main__":
     parser.add_argument('output', type=str, help='full-path to output')
     args = parser.parse_args()
 
+    print(torch.cuda.is_available())
+
     dfe = DeepFeatureExtractor(args.model, gpu=args.use_cuda)
 
     image_filenames = os.listdir(args.path)
-    accepted_extentions = ("jpg", "jp2", "jpeg", "png", "bmp", "tiff")
+    accepted_extentions = ("jpg", "jp2", "jpeg", "png", "bmp", "tiff", "gif")
 
     valid_image_filenames = []
     for im in image_filenames:
