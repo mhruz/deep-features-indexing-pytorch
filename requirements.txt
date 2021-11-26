@@ -3,5 +3,6 @@ h5py==2.10.0
 numpy==1.18.4
 Pillow==7.1.2
 six==1.14.0
-torch==1.5.0
-torchvision==0.6.0
+torch~=1.10.0+cu102
+torchvision~=0.11.1+cu102
+scikit-learn~=1.0.1
